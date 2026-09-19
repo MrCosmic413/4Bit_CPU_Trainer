@@ -1,0 +1,22 @@
+{
+  "name": "CD74HC173E - 4-bit Register",
+  "author": "OpenAI",
+  "pins": [
+    "OE1",
+    "OE2",
+    "Q0",
+    "Q1",
+    "Q2",
+    "Q3",
+    "CP",
+    "GND",
+    "E1",
+    "E2",
+    "D3",
+    "D2",
+    "D1",
+    "D0",
+    "MR",
+    "VCC"
+  ]
+}

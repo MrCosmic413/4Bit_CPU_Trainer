@@ -1,91 +1,77 @@
-4-Bit Logic Trainer
+# 4-Bit ALU Trainer
 
-A hands-on 4-bit trainer for exploring how registers, logic gates, an adder, and multiplexers work together. This repository is intended to stand on its own, separate from the NAND project.
+A breadboard trainer for trying four operations on two stored 4-bit numbers: **AND, OR, XOR, and addition**. Buttons set the input bits, registers hold A and B, two select lines choose the operation, and an output register captures the result. This project has its own repository, separate from NAND.
 
-## At a glance
+![Annotated breadboard overview showing the registers, logic circuits, controls, output, and multiplexers](docs/photos/breadboard-overview.jpg)
 
-- Four input bits (`IN0`–`IN3`) feed the A and B registers.
-- Two select switches choose AND, OR, XOR, or ADD.
-- A third register captures the result, displayed on four LEDs.
-- A shared clock and reset control the registers.
+## How it works
 
-| SEL1 | SEL0 | Operation |
+```text
+4 input buttons ──┬──> A register ──┬──> AND / OR / XOR / ADD ──> multiplexers ──> OUT register ──> LEDs
+                 └──> B register ──┘                    SEL1, SEL0
+                       LOAD A/B                            LOAD OUT, CLK, RESET
+```
+
+The same four input buttons load A and B at different times. The operation runs on the stored values, and `LOAD OUT` captures the selected result on a clock pulse. The simulation shows four result LEDs; the schematic also includes a carry indicator for the adder.
+
+| SEL1 | SEL0 | Selected operation |
 |:---:|:---:|---|
 | 0 | 0 | A AND B |
 | 0 | 1 | A OR B |
 | 1 | 0 | A XOR B |
-| 1 | 1 | A + B (low four bits) |
+| 1 | 1 | A + B (four result bits) |
 
-## Build photos
+## Physical build
 
-Add your photos to [`docs/photos`](docs/photos), then replace the example paths below with the actual filenames.
+The annotated breadboard photo above identifies the major sections. The manual controls are grouped at the front, the logic and adder sit between the input registers and multiplexers, and the LEDs show the output. The physical schematic includes a separate carry LED.
 
-<!-- Example: ![Completed 4-bit trainer](docs/photos/finished-trainer.jpg) -->
-<!-- Example: ![Breadboard or PCB close-up](docs/photos/build-closeup.jpg) -->
+More build photos can go in [`docs/photos`](docs/photos). To show one here, add an image to that folder and use a line such as `![Close-up of the controls](docs/photos/controls.jpg)`.
 
-**Build notes:** Add the board revision, power supply, notable wiring choices, and anything you changed during assembly here.
+## KiCad schematic
 
-## KiCad design
+![KiCad schematic of the 4-bit computer trainer](docs/photos/kicad-schematic.png)
 
-Put the KiCad project, schematic, PCB, and any exported PDFs or fabrication files in [`hardware/kicad`](hardware/kicad). Add a screenshot of the schematic or board layout here when ready.
+The schematic screenshot shows the two input registers, gate and adder paths, multiplexers, output register, controls, and LED resistors. The editable KiCad project files have **not** been included yet. Put the `.kicad_pro`, `.kicad_sch`, and any `.kicad_pcb` files in [`hardware/kicad`](hardware/kicad) when they are ready; the screenshot is a reference, not an editable schematic.
 
-<!-- Example: ![KiCad PCB layout](docs/photos/kicad-pcb.png) -->
+## Wokwi simulation
 
-**Design status:** KiCad files have not been added yet.
+![Wokwi overview showing the input buttons, registers, operations, select controls, and four output LEDs](docs/simulation/wokwi-overview.png)
 
-## Simulation
+The [`simulation`](simulation) folder contains `diagram.json`, `sketch.ino`, six custom chip models, and [`EXPECTED_TESTS.txt`](simulation/EXPECTED_TESTS.txt). The Arduino Uno supplies simulated 5 V and ground only; the logic chips perform the operation.
 
-The [`simulation`](simulation) folder contains the Wokwi circuit, Arduino power-source sketch, six custom chip models, and expected test results. The Arduino in this simulation supplies simulated 5 V and ground; it does not compute the logic result.
+### Run it
 
-To set it up in Wokwi:
-
-1. Create a new Arduino Uno project.
-2. Add six C custom chips named `hc173`, `hc153`, `hc283`, `hc08`, `hc32`, and `hc86`.
-3. Replace each generated `.chip.c` and `.chip.json` file with its matching file from [`simulation`](simulation).
-4. Replace `diagram.json` and `sketch.ino` with the files in that folder.
+1. Create a new Arduino Uno project in Wokwi.
+2. Add C custom chips named `hc173`, `hc153`, `hc283`, `hc08`, `hc32`, and `hc86`.
+3. Replace each generated `.chip.c` and `.chip.json` with the matching file from [`simulation`](simulation).
+4. Replace the project's `diagram.json` and `sketch.ino` with the copies in that folder.
 5. Start the simulation.
 
-<!-- Example: ![Simulation running an addition test](docs/simulation/add-test.png) -->
+**Live Wokwi project:** Add the project URL here when published.
 
-### Controls
+The `IN0`–`IN3` buttons are momentary; Ctrl-click latches a button while entering a multi-bit value. `LOAD A`, `LOAD B`, and `LOAD OUT` are active low in the simulation (right = load, left = idle). Move `CLK` right then left for one pulse. Move `RESET` right then left to clear the registers.
 
-The four `IN` buttons are momentary. In Wokwi, Ctrl-click can latch a button while entering a multi-bit value. `LOAD A`, `LOAD B`, and `LOAD OUT` are active low: move the switch right to load, and left for idle. Move `CLK` right and then left for one pulse. Do the same with `RESET` to clear the registers. `SEL0` and `SEL1` set the operation according to the table above.
-
-### Quick check
+### Example: A = `0101`, B = `0011`
 
 1. Pulse `RESET`.
-2. Enter `0101`; enable `LOAD A`, pulse `CLK`, then disable `LOAD A`.
-3. Enter `0011`; enable `LOAD B`, pulse `CLK`, then disable `LOAD B`.
-4. Select an operation; enable `LOAD OUT`, pulse `CLK`, then disable `LOAD OUT`.
+2. Set the input to `0101`, enable `LOAD A`, pulse `CLK`, then disable `LOAD A`.
+3. Set the input to `0011`, enable `LOAD B`, pulse `CLK`, then disable `LOAD B`.
+4. Choose `SEL1` and `SEL0`, enable `LOAD OUT`, pulse `CLK`, then disable `LOAD OUT`.
 
-| Operation | Expected four LED result |
-|---|:---:|
-| AND | `0001` |
-| OR | `0111` |
-| XOR | `0110` |
-| ADD | `1000` |
+| Selection | Operation | Four-bit result |
+|:---:|---|:---:|
+| `00` | AND | `0001` |
+| `01` | OR | `0111` |
+| `10` | XOR | `0110` |
+| `11` | ADD | `1000` |
 
-See [`EXPECTED_TESTS.txt`](simulation/EXPECTED_TESTS.txt) for the compact test list.
+## Repository contents
 
-## Hardware used in the simulation
+| Folder | Contents |
+|---|---|
+| [`simulation/`](simulation) | Wokwi circuit, chip models, and expected results |
+| [`hardware/kicad/`](hardware/kicad) | Space for editable KiCad files |
+| [`docs/photos/`](docs/photos) | Annotated breadboard and schematic images; room for more build photos |
+| [`docs/simulation/`](docs/simulation) | Wokwi overview; room for more test screenshots |
 
-- 3 × CD74HC173E 4-bit registers (A, B, output)
-- 1 × 74HC08 AND, 1 × 74HC32 OR, 1 × 74HC86 XOR
-- 1 × CD74HC283E 4-bit adder
-- 2 × CD74HC153E dual 4-to-1 multiplexers
-- Four input buttons, control switches, and four output LEDs
-
-## Project layout
-
-```text
-4-bit-trainer/
-├── README.md
-├── simulation/       Wokwi project files and test expectations
-├── hardware/kicad/    KiCad files to add
-├── docs/photos/       Build and board photos to add
-└── docs/simulation/   Simulation screenshots to add
-```
-
-## Notes
-
-This repository documents a trainer project in progress. Verify the hardware design and wiring before applying power to a physical build.
+The simulation models three CD74HC173E registers, 74HC08/32/86 gates, a CD74HC283E adder, and two CD74HC153E multiplexers. Check the physical wiring and power connections against the eventual editable schematic before powering a rebuilt circuit.
